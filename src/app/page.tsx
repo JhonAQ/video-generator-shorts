@@ -1,103 +1,274 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Play,
+  Film,
+  Sparkles,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
+// Components
+import ImageUploader from "@/components/ImageUploader";
+import AudioUploader from "@/components/AudioUploader";
+import SoundtrackSelector from "@/components/SoundtrackSelector";
+import FilterSelector from "@/components/FilterSelector";
+import ThumbnailUploader from "@/components/ThumbnailUploader";
+import VideoProcessor from "@/components/VideoProcessor";
+
+const steps = [
+  {
+    id: "images",
+    title: "Imágenes",
+    description: "Carga las 30 imágenes para tu video",
+    icon: <Film className="w-6 h-6" />,
+    component: ImageUploader,
+  },
+  {
+    id: "audio",
+    title: "Audio",
+    description: "Sube el audio de narración",
+    icon: <Play className="w-6 h-6" />,
+    component: AudioUploader,
+  },
+  {
+    id: "soundtrack",
+    title: "Soundtrack",
+    description: "Selecciona música de fondo",
+    icon: <Sparkles className="w-6 h-6" />,
+    component: SoundtrackSelector,
+  },
+  {
+    id: "filters",
+    title: "Efectos",
+    description: "Agrega filtros visuales",
+    icon: <Sparkles className="w-6 h-6" />,
+    component: FilterSelector,
+  },
+  {
+    id: "thumbnail",
+    title: "Miniatura",
+    description: "Imagen de introducción",
+    icon: <Film className="w-6 h-6" />,
+    component: ThumbnailUploader,
+  },
+  {
+    id: "generate",
+    title: "Generar",
+    description: "Crear el video final",
+    icon: <ArrowRight className="w-6 h-6" />,
+    component: VideoProcessor,
+  },
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [currentStep, setCurrentStep] = useState(0);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const goToStep = (stepIndex: number) => {
+    setCurrentStep(stepIndex);
+  };
+
+  const CurrentComponent = steps[currentStep].component;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      {/* Background Pattern */}
+      <div className="fixed inset-0 opacity-5">
+        <div
+          className="absolute inset-0 bg-repeat"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
+
+      <div className="relative">
+        {/* Header */}
+        <header className="border-b border-gray-800">
+          <div className="max-w-7xl mx-auto px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Film className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">
+                    VideoGen Pro
+                  </h1>
+                  <p className="text-gray-400 text-sm">
+                    Generador de Videos Profesional
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-gray-300 font-semibold">
+                    Paso {currentStep + 1} de {steps.length}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    {steps[currentStep].title}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-12 gap-8">
+            {/* Sidebar - Steps Navigation */}
+            <div className="col-span-3">
+              <div className="sticky top-8 space-y-1">
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Proceso de Creación
+                </h3>
+
+                {steps.map((step, index) => (
+                  <button
+                    key={step.id}
+                    onClick={() => goToStep(index)}
+                    className={`
+                      w-full flex items-center gap-3 p-4 rounded-xl text-left transition-all
+                      ${
+                        index === currentStep
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                          : index < currentStep
+                          ? "bg-green-500/10 text-green-300 hover:bg-green-500/20"
+                          : "bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-gray-300"
+                      }
+                    `}
+                  >
+                    <div
+                      className={`
+                      flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
+                      ${
+                        index === currentStep
+                          ? "bg-white/20"
+                          : index < currentStep
+                          ? "bg-green-500/20"
+                          : "bg-gray-700"
+                      }
+                    `}
+                    >
+                      {index < currentStep ? (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
+                        >
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        </motion.div>
+                      ) : (
+                        step.icon
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold">{step.title}</p>
+                      <p
+                        className={`text-xs ${
+                          index === currentStep
+                            ? "text-blue-200"
+                            : index < currentStep
+                            ? "text-green-200/80"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {step.description}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="col-span-9">
+              <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-800 rounded-2xl p-8">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CurrentComponent />
+                </motion.div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-800">
+                  <button
+                    onClick={prevStep}
+                    disabled={currentStep === 0}
+                    className={`
+                      flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                      ${
+                        currentStep === 0
+                          ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                      }
+                    `}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                    Anterior
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {steps.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => goToStep(index)}
+                        className={`
+                          w-3 h-3 rounded-full transition-all
+                          ${
+                            index === currentStep
+                              ? "bg-blue-500 w-8"
+                              : index < currentStep
+                              ? "bg-green-500"
+                              : "bg-gray-600"
+                          }
+                        `}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={nextStep}
+                    disabled={currentStep === steps.length - 1}
+                    className={`
+                      flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                      ${
+                        currentStep === steps.length - 1
+                          ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/25"
+                      }
+                    `}
+                  >
+                    Siguiente
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "epic-cinematic",
+    "name": "Epic Cinematic",
+    "file": "/sounds/epic-cinematic.mp3",
+    "duration": 120,
+    "genre": "Epic"
+  },
+  {
+    "id": "mystery-ambient",
+    "name": "Mystery Ambient",
+    "file": "/sounds/mystery-ambient.mp3",
+    "duration": 90,
+    "genre": "Mystery"
+  },
+  {
+    "id": "tech-upbeat",
+    "name": "Tech Upbeat",
+    "file": "/sounds/tech-upbeat.mp3",
+    "duration": 105,
+    "genre": "Electronic"
+  },
+  {
+    "id": "dramatic-tension",
+    "name": "Dramatic Tension",
+    "file": "/sounds/dramatic-tension.mp3",
+    "duration": 95,
+    "genre": "Dramatic"
+  },
+  {
+    "id": "peaceful-ambient",
+    "name": "Peaceful Ambient",
+    "file": "/sounds/peaceful-ambient.mp3",
+    "duration": 110,
+    "genre": "Ambient"
+  },
+  {
+    "id": "ytshorts-copy",
+    "name": "Terror youtube without copy",
+    "file": "/sounds/ytshorts-copy.mp3",
+    "duration": 29,
+    "genre": "Ambient"
+  },
+  {
+    "id": "action-intense",
+    "name": "Action Intense",
+    "file": "/sounds/action-intense.mp3",
+    "duration": 85,
+    "genre": "Action"
+  }
+]

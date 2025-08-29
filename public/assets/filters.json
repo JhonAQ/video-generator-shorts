@@ -1,0 +1,44 @@
+[
+  {
+    "id": "glitch-overlay",
+    "name": "Glitch Overlay",
+    "file": "/filters/glitch-overlay.mp4",
+    "preview": "/filters/previews/glitch-overlay.jpg",
+    "description": "Efectos de glitch digital moderno"
+  },
+  {
+    "id": "particles-flow",
+    "name": "Particles Flow",
+    "file": "/filters/particles-flow.mp4",
+    "preview": "/filters/previews/particles-flow.jpg",
+    "description": "Flujo de partículas energéticas"
+  },
+  {
+    "id": "neon-frames",
+    "name": "Neon Frames",
+    "file": "/filters/neon-frames.mp4",
+    "preview": "/filters/previews/neon-frames.jpg",
+    "description": "Marcos de neón futuristas"
+  },
+  {
+    "id": "smoke-transitions",
+    "name": "Smoke Transitions",
+    "file": "/filters/smoke-transitions.mp4",
+    "preview": "/filters/previews/smoke-transitions.jpg",
+    "description": "Transiciones de humo cinematográfico"
+  },
+  {
+    "id": "light-leaks",
+    "name": "Light Leaks",
+    "file": "/filters/light-leaks.mp4",
+    "preview": "/filters/previews/light-leaks.jpg",
+    "description": "Filtraciones de luz vintage"
+  },
+  {
+    "id": "holographic",
+    "name": "Holographic",
+    "file": "/filters/holographic.mp4",
+    "preview": "/filters/previews/holographic.jpg",
+    "description": "Efectos holográficos futuristas"
+  }
+]

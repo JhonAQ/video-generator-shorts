@@ -1,0 +1,17 @@
+# Video processing requirements
+# Install with: pip install -r requirements.txt
+
+# Core dependencies
+Pillow>=10.0.0          # Image processing
+numpy>=1.24.0           # Numerical operations
+
+# Optional: For advanced processing (if needed later)
+# opencv-python>=4.8.0   # Advanced image processing
+# moviepy>=1.0.3         # Alternative video processing
+
+# System requirements (install separately):
+# - FFmpeg (https://ffmpeg.org/download.html)
+# - FFprobe (included with FFmpeg)
+
+# Note: This project primarily uses FFmpeg for video processing
+# which needs to be installed separately on the system
