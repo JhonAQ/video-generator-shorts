@@ -571,3 +571,5 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({ className = "" }) => {
     </div>
   );
 };
+
+export default VideoProcessor;
