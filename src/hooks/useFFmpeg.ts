@@ -102,6 +102,29 @@ export const useFFmpeg = () => {
       // Write audio narration
       await ffmpeg.writeFile('narration.mp3', await fetchFile(config.audioNarration))
 
+      // Write soundtrack if selected
+      let hasSoundtrack = false
+      if (config.selectedSoundtrack) {
+        console.log('Loading soundtrack:', config.selectedSoundtrack)
+        try {
+          const soundtrackResponse = await fetch(config.selectedSoundtrack)
+          console.log('Soundtrack response status:', soundtrackResponse.status)
+          if (soundtrackResponse.ok) {
+            const soundtrackBlob = await soundtrackResponse.blob()
+            console.log('Soundtrack blob size:', soundtrackBlob.size)
+            await ffmpeg.writeFile('soundtrack.mp3', await fetchFile(soundtrackBlob))
+            hasSoundtrack = true
+            console.log('Soundtrack loaded successfully')
+          } else {
+            console.warn('Soundtrack response not ok:', soundtrackResponse.statusText)
+          }
+        } catch (err) {
+          console.warn('Could not load soundtrack:', err)
+        }
+      } else {
+        console.log('No soundtrack selected')
+      }
+
       onProgress?.({
         phase: 'processing',
         progress: 50,
@@ -122,18 +145,44 @@ export const useFFmpeg = () => {
       onProgress?.({
         phase: 'processing',
         progress: 75,
-        message: 'Agregando audio...'
+        message: 'Mezclando audio...'
       })
 
-      // Add audio to video
-      await ffmpeg.exec([
-        '-i', 'slideshow.mp4',
-        '-i', 'narration.mp3',
-        '-c:v', 'copy',
-        '-c:a', 'aac',
-        '-shortest',
-        'final.mp4'
-      ])
+      // Mix audio: narration + soundtrack (if available)
+      if (hasSoundtrack) {
+        console.log('Mixing narration with soundtrack...')
+        // First mix the narration with soundtrack (narration at full volume, soundtrack at 30%)
+        await ffmpeg.exec([
+          '-i', 'narration.mp3',
+          '-i', 'soundtrack.mp3',
+          '-filter_complex', '[0:a]volume=1.0[narration];[1:a]volume=0.3[soundtrack];[narration][soundtrack]amix=inputs=2:duration=shortest:dropout_transition=2[a]',
+          '-map', '[a]',
+          '-c:a', 'aac',
+          'mixed_audio.aac'
+        ])
+
+        console.log('Adding mixed audio to video...')
+        // Then combine with video
+        await ffmpeg.exec([
+          '-i', 'slideshow.mp4',
+          '-i', 'mixed_audio.aac',
+          '-c:v', 'copy',
+          '-c:a', 'aac',
+          '-shortest',
+          'final.mp4'
+        ])
+      } else {
+        console.log('Adding narration only to video...')
+        // Only narration audio
+        await ffmpeg.exec([
+          '-i', 'slideshow.mp4',
+          '-i', 'narration.mp3',
+          '-c:v', 'copy',
+          '-c:a', 'aac',
+          '-shortest',
+          'final.mp4'
+        ])
+      }
 
       onProgress?.({
         phase: 'finalizing',

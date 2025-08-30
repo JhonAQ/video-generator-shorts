@@ -9,14 +9,14 @@
   {
     "id":"tt-horror",
     "name": "Terror tiktok viral",
-    "file": "/sounds/tiktok-viral.mp3",
+    "file": "/sounds/tiktok-viral.MP3",
     "duration": 84,
     "genre": "Ambient"
   },
   {
     "id": "ytshort-horror-tipico",
     "name": "Terror youtube sin copy",
-    "file": "/sounds/tipico-horror.mp3",
+    "file": "/sounds/tipico-horror.MP3",
     "duration": 105,
     "genre": "Ambient"
   }
