@@ -128,7 +128,7 @@ export const useFFmpeg = () => {
       onProgress?.({
         phase: 'processing',
         progress: 50,
-        message: 'Creando slideshow...'
+        message: 'Creando slideshow base...'
       })
 
       // Create slideshow video from images (2 seconds per image, 30 images = 60 seconds)
@@ -139,25 +139,54 @@ export const useFFmpeg = () => {
         '-c:v', 'libx264',
         '-pix_fmt', 'yuv420p',
         '-t', '60', // 60 seconds total
+        'slideshow_base.mp4'
+      ])
+
+      onProgress?.({
+        phase: 'processing',
+        progress: 60,
+        message: 'Extendiendo video con fade-out...'
+      })
+
+      // Extend the video by 1.5 seconds and add fade-out
+      await ffmpeg.exec([
+        '-i', 'slideshow_base.mp4',
+        '-vf', 'fade=t=out:st=60:d=1.5',
+        '-t', '61.5', // Extend to 61.5 seconds
         'slideshow.mp4'
       ])
 
       onProgress?.({
         phase: 'processing',
-        progress: 75,
-        message: 'Mezclando audio...'
+        progress: 80,
+        message: 'Procesando audio con loop y fade-out...'
       })
 
       // Mix audio: narration + soundtrack (if available)
       if (hasSoundtrack) {
         console.log('Mixing narration with soundtrack...')
-        // First mix the narration with soundtrack (narration at full volume, soundtrack at 30%)
+        
+        // First, create a longer soundtrack by looping it
+        await ffmpeg.exec([
+          '-stream_loop', '10', // Loop soundtrack 10 times to ensure it's long enough
+          '-i', 'soundtrack.mp3',
+          '-t', '70', // Make it 70 seconds to be safe
+          'soundtrack_long.mp3'
+        ])
+
+        // Then mix narration with the long soundtrack
         await ffmpeg.exec([
           '-i', 'narration.mp3',
-          '-i', 'soundtrack.mp3',
-          '-filter_complex', '[0:a]volume=1.0[narration];[1:a]volume=0.3[soundtrack];[narration][soundtrack]amix=inputs=2:duration=shortest:dropout_transition=2[a]',
-          '-map', '[a]',
-          '-c:a', 'aac',
+          '-i', 'soundtrack_long.mp3',
+          '-filter_complex', '[1:a]volume=0.3[bg];[0:a][bg]amix=inputs=2:duration=longest',
+          '-t', '61.5', // 60s + 1.5s fade
+          'mixed_base.aac'
+        ])
+
+        // Add fade-out to the mixed audio
+        await ffmpeg.exec([
+          '-i', 'mixed_base.aac',
+          '-af', 'afade=t=out:st=60:d=1.5',
           'mixed_audio.aac'
         ])
 
@@ -173,10 +202,18 @@ export const useFFmpeg = () => {
         ])
       } else {
         console.log('Adding narration only to video...')
-        // Only narration audio
+        
+        // Extend narration audio to match video duration
+        await ffmpeg.exec([
+          '-i', 'narration.mp3',
+          '-af', 'apad=pad_dur=1.5,afade=t=out:st=60:d=1.5',
+          'narration_extended.aac'
+        ])
+
+        // Combine with video
         await ffmpeg.exec([
           '-i', 'slideshow.mp4',
-          '-i', 'narration.mp3',
+          '-i', 'narration_extended.aac',
           '-c:v', 'copy',
           '-c:a', 'aac',
           '-shortest',
