@@ -102,6 +102,48 @@ export const useFFmpeg = () => {
       // Write audio narration
       await ffmpeg.writeFile('narration.mp3', await fetchFile(config.audioNarration))
 
+      // Get audio duration to calculate proper image timing
+      onProgress?.({
+        phase: 'preparing',
+        progress: 45,
+        message: 'Analizando duración del audio...'
+      })
+
+      // Get audio duration using HTML5 Audio API
+      let audioDuration = 60 // Default fallback
+      try {
+        const audioUrl = URL.createObjectURL(config.audioNarration)
+        const audio = new Audio(audioUrl)
+        
+        await new Promise<void>((resolve, reject) => {
+          audio.addEventListener('loadedmetadata', () => {
+            audioDuration = audio.duration
+            URL.revokeObjectURL(audioUrl)
+            resolve()
+          })
+          audio.addEventListener('error', () => {
+            console.warn('Could not get audio duration, using default 60s')
+            URL.revokeObjectURL(audioUrl)
+            resolve()
+          })
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            URL.revokeObjectURL(audioUrl)
+            resolve()
+          }, 5000)
+        })
+      } catch (err) {
+        console.warn('Error getting audio duration:', err)
+      }
+
+      // Calculate timing based on actual audio duration and image count
+      const imageCount = config.images.length
+      const secondsPerImage = audioDuration / imageCount
+      const framerate = 1 / secondsPerImage // fps = 1 / seconds_per_frame
+
+      console.log(`Audio duration: ${audioDuration.toFixed(2)}s`)
+      console.log(`Image timing: ${imageCount} images, ${secondsPerImage.toFixed(2)}s per image, ${framerate.toFixed(3)} fps`)
+
       // Write soundtrack if selected
       let hasSoundtrack = false
       if (config.selectedSoundtrack) {
@@ -128,17 +170,17 @@ export const useFFmpeg = () => {
       onProgress?.({
         phase: 'processing',
         progress: 50,
-        message: 'Creando slideshow base...'
+        message: 'Creando slideshow con timing dinámico...'
       })
 
-      // Create slideshow video from images (2 seconds per image, 30 images = 60 seconds)
+      // Create slideshow video with dynamic timing based on audio duration and image count
       await ffmpeg.exec([
-        '-framerate', '0.5', // 0.5 fps = 2 seconds per frame
+        '-framerate', framerate.toString(),
         '-i', 'image%03d.png',
         '-vf', 'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:black',
         '-c:v', 'libx264',
         '-pix_fmt', 'yuv420p',
-        '-t', '60', // 60 seconds total
+        '-t', audioDuration.toString(),
         'slideshow_base.mp4'
       ])
 
@@ -149,10 +191,11 @@ export const useFFmpeg = () => {
       })
 
       // Extend the video by 1.5 seconds and add fade-out
+      const totalDuration = audioDuration + 1.5
       await ffmpeg.exec([
         '-i', 'slideshow_base.mp4',
-        '-vf', 'fade=t=out:st=60:d=1.5',
-        '-t', '61.5', // Extend to 61.5 seconds
+        '-vf', `fade=t=out:st=${audioDuration}:d=1.5`,
+        '-t', totalDuration.toString(),
         'slideshow.mp4'
       ])
 
@@ -167,10 +210,11 @@ export const useFFmpeg = () => {
         console.log('Mixing narration with soundtrack...')
         
         // First, create a longer soundtrack by looping it
+        const soundtrackDuration = totalDuration + 10 // Add extra buffer
         await ffmpeg.exec([
           '-stream_loop', '10', // Loop soundtrack 10 times to ensure it's long enough
           '-i', 'soundtrack.mp3',
-          '-t', '70', // Make it 70 seconds to be safe
+          '-t', soundtrackDuration.toString(),
           'soundtrack_long.mp3'
         ])
 
@@ -179,14 +223,14 @@ export const useFFmpeg = () => {
           '-i', 'narration.mp3',
           '-i', 'soundtrack_long.mp3',
           '-filter_complex', '[1:a]volume=0.3[bg];[0:a][bg]amix=inputs=2:duration=longest',
-          '-t', '61.5', // 60s + 1.5s fade
+          '-t', totalDuration.toString(),
           'mixed_base.aac'
         ])
 
         // Add fade-out to the mixed audio
         await ffmpeg.exec([
           '-i', 'mixed_base.aac',
-          '-af', 'afade=t=out:st=60:d=1.5',
+          '-af', `afade=t=out:st=${audioDuration}:d=1.5`,
           'mixed_audio.aac'
         ])
 
@@ -206,7 +250,7 @@ export const useFFmpeg = () => {
         // Extend narration audio to match video duration
         await ffmpeg.exec([
           '-i', 'narration.mp3',
-          '-af', 'apad=pad_dur=1.5,afade=t=out:st=60:d=1.5',
+          '-af', `apad=pad_dur=1.5,afade=t=out:st=${audioDuration}:d=1.5`,
           'narration_extended.aac'
         ])
 
